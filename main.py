@@ -34,6 +34,12 @@ def format_report(coffee_resources):
            f"{keys[3]}: ${coffee_resources[keys[3]]}"
 
 
+# TODO 4) Check resources sufficient?
+#  a. When the user chooses a drink, the program should check if there are enough  resources to make that drink.
+#  b. E.g. if Latte requires 200ml water but there is only 100ml left in the machine.
+#  It should not continue to make the drink but print: “Sorry there is not enough water.”
+#  c. The same should happen if another resource is depleted, e.g. milk or coffee.
+
 def enough_resources(coffee_choice):
     """
 
@@ -47,41 +53,28 @@ def enough_resources(coffee_choice):
     not_enough_of = []
     for i in coffee_choice["ingredients"]:
         # coffee require more resources than there are resources
-        if coffee_choice["ingredients"][i] > resources[i] :
+        if coffee_choice["ingredients"][i] > resources[i]:
             not_enough_of.append(i)
 
     return not_enough_of
 
-def make_coffee(coffee_choice):
-    return
 
+def print_missing_resources(missing_resources_list):
+    """
+    Function takes a list of missing resources returned from enough_resources() and
+    returns formatted string of the resources concat with " or " for more than 1 resource missing
+    or simply returns the string of the resource
 
-
-
-coffee_machine_on = True
-
-while coffee_machine_on:
-    choice = input(f"What would you like? (espresso/latte/cappuccino):").lower()
-    if choice in MENU:
-        choice = MENU[choice]
-        can_make_coffee = enough_resources(choice)
-        print(can_make_coffee)
-        if can_make_coffee:
-            make_coffee(choice)
-
-    elif choice == 'off':
-        print("Switching off for maintenance")
-        coffee_machine_on = False
-    elif choice == 'report':
-        print(format_report(resources))
-    else:
-        print("not here")
-
-# TODO 4) Check resources sufficient?
-#  a. When the user chooses a drink, the program should check if there are enough  resources to make that drink.
-#  b. E.g. if Latte requires 200ml water but there is only 100ml left in the machine.
-#  It should not continue to make the drink but print: “Sorry there is not enough water.”
-#  c. The same should happen if another resource is depleted, e.g. milk or coffee.
+    :param missing_resources_list:
+    :return: resources as a formatted string
+    """
+    missing_resources_local_str = ''
+    for i in missing_resources_list:
+        if i != missing_resources_list[-1]:
+            missing_resources_local_str += i + " or "
+        else:
+            missing_resources_local_str += i
+    return missing_resources_local_str
 
 
 # TODO 5) Process coins.
@@ -90,19 +83,81 @@ while coffee_machine_on:
 #  b. Remember that quarters = $0.25, dimes = $0.10, nickles = $0.05, pennies = $0.01 c. Calculate the monetary value
 #  of the coins inserted. E.g. 1 quarter, 2 dimes, 1 nickel, 2 pennies = 0.25 + 0.1 x 2 + 0.05 + 0.01 x 2 = $0.52
 
+def process_coins(coffee_choice):
+    """
 
-# TODO 6) Check transaction successful?
-#  a. Check that the user has inserted enough money to purchase the drink they selected.
-#  E.g Latte cost $2.50, but they only inserted $0.52 then after counting the coins the
-#  program should say “Sorry that's not enough money. Money refunded.”.
-#  b. But if the user has inserted enough money, then the cost of the drink gets added to the
-#  machine as the profit and this will be reflected the next time “report” is triggered. E.g.
-#  Water: 100ml
-#  Milk: 50ml
-#  Coffee: 76g
-#  Money: $2.5
-#  c. If the user has inserted too much money, the machine should offer change.
-#  E.g. “Here is $2.45 dollars in change.” The change should be rounded to 2 decimal places.
+    Function takes the dictionary of the users choice of coffee which will use "cost" key to determine price.
+    Then the use will insert coins, and we will return the remaining change.
+
+    :param coffee_choice: dictionary containing information on chosen coffee
+    :return: list with a bool (to determine if enough money was put in) and float of money returned
+    """
+
+    coffee_price = coffee_choice["cost"]
+
+    quarters = int(input("How many quarters?: ")) * 0.25
+    dimes = int(input("How many dimes?: ")) * 0.10
+    nickels = int(input("How many nickels?: ")) * 0.05
+    pennies = int(input("How many pennies?: ")) * 0.01
+
+    money_inserted = quarters + dimes + nickels + pennies
+
+    if money_inserted >= coffee_price:
+        money_refunded = money_inserted - coffee_price
+    else:
+        money_refunded = money_inserted
+
+    output = [money_inserted >= coffee_price, money_refunded]
+
+    return output
+
+
+def make_coffee(coffee_choice):
+    return
+
+
+coffee_machine_on = True
+
+while coffee_machine_on:
+    choice_str = input(f"What would you like? (espresso/latte/cappuccino):").lower()
+    if choice_str in MENU:
+        choice_dict = MENU[choice_str]
+        missing_resources = enough_resources(choice_dict)
+        if missing_resources:
+            missing_resources_str = print_missing_resources(missing_resources)
+            print(f"Sorry, there isn't enough {missing_resources_str}.")
+        else:
+            # TODO 6) Check transaction successful?
+            #  a. Check that the user has inserted enough money to purchase the drink they selected.
+            #  E.g Latte cost $2.50, but they only inserted $0.52 then after counting the coins the
+            #  program should say “Sorry that's not enough money. Money refunded.”.
+            #  b. But if the user has inserted enough money, then the cost of the drink gets added to the
+            #  machine as the profit and this will be reflected the next time “report” is triggered. E.g.
+            #  Water: 100ml
+            #  Milk: 50ml
+            #  Coffee: 76g
+            #  Money: $2.5
+            #  c. If the user has inserted too much money, the machine should offer change.
+            #  E.g. “Here is $2.45 dollars in change.” The change should be rounded to 2 decimal places.
+            refund = process_coins(choice_dict)
+            # if first element of the list is True - enough money was inserted
+            if refund[0]:
+                print(f"Here is ${refund[1]} in change.")
+                print(f"Here is your {choice_str}. Enjoy!")
+                resources["money"] += choice_dict["cost"]
+                make_coffee(choice_dict)
+            else:
+                print(f"Sorry, insufficient funds. Refunded ${refund[1]}.")
+
+    elif choice_str == 'off':
+        print("Switching off for maintenance")
+        coffee_machine_on = False
+    elif choice_str == 'report':
+        print(format_report(resources))
+    else:
+        print("not here")
+
+
 
 
 # TODO 7) Make Coffee.
