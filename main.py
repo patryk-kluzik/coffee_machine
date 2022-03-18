@@ -44,11 +44,18 @@ def enough_resources(coffee_choice):
     :param coffee_choice: return dictionary of the coffee chosen my user
     :return: list of bools, adding True if there are enough resources to make coffee otherwise False
     """
-    enough_to_make_drink = list()
+    not_enough_of = []
     for i in coffee_choice["ingredients"]:
-        enough_to_make_drink.append(coffee_choice["ingredients"][i] <= resources[i])
+        # coffee require more resources than there are resources
+        if coffee_choice["ingredients"][i] > resources[i] :
+            not_enough_of.append(i)
 
-    return enough_to_make_drink
+    return not_enough_of
+
+def make_coffee(coffee_choice):
+    return
+
+
 
 
 coffee_machine_on = True
@@ -59,6 +66,9 @@ while coffee_machine_on:
         choice = MENU[choice]
         can_make_coffee = enough_resources(choice)
         print(can_make_coffee)
+        if can_make_coffee:
+            make_coffee(choice)
+
     elif choice == 'off':
         print("Switching off for maintenance")
         coffee_machine_on = False
