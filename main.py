@@ -18,6 +18,14 @@ resources["money"] = 0
 
 
 def format_report(coffee_resources):
+    """
+
+    This function takes the resources as the parameter and returns a string of formatted
+    text which will be printed to the console
+
+    :param coffee_resources a dictionary of all coffees
+    :return: formatted string of all resources and their values
+    """
     # list of all the keys
     keys = list(coffee_resources.keys())
     return f"{keys[0]}: {coffee_resources[keys[0]]} \n" \
@@ -27,8 +35,20 @@ def format_report(coffee_resources):
 
 
 def enough_resources(coffee_choice):
-    ingredients = list(coffee_choice["ingredients"].keys())
-    return ingredients
+    """
+
+    This function takes the dictionary of coffee as param, with the ingredients and the cost
+    and checks if there are enough resources to make the coffee by comparing the values for the keys between
+    the coffee dictionary and the resources dictionary and returns a list of bools
+
+    :param coffee_choice: return dictionary of the coffee chosen my user
+    :return: list of bools, adding True if there are enough resources to make coffee otherwise False
+    """
+    enough_to_make_drink = list()
+    for i in coffee_choice["ingredients"]:
+        enough_to_make_drink.append(coffee_choice["ingredients"][i] <= resources[i])
+
+    return enough_to_make_drink
 
 
 coffee_machine_on = True
