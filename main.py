@@ -2,7 +2,6 @@ from data import MENU, resources
 
 resources["money"] = 0
 
-
 # TODO: 1) Prompt user by asking “What would you like? (espresso/latte/cappuccino):”
 #  a. Check the user’s input to decide what to do next.
 #  b. The prompt should show every time action has completed, e.g. once the drink is
@@ -107,13 +106,47 @@ def process_coins(coffee_choice):
     else:
         money_refunded = money_inserted
 
-    output = [money_inserted >= coffee_price, money_refunded]
+    output = [money_inserted >= coffee_price, round(money_refunded, 2)]
 
     return output
 
 
-def make_coffee(coffee_choice):
-    return
+# TODO 7) Make Coffee.
+#  a. If the transaction is successful and there are enough resources to make the drink the
+#  user selected, then the ingredients to make the drink should be deducted from the coffee machine resources.
+#  E.g. report before purchasing latte:
+#       Water: 300ml
+#       Milk: 200ml
+#       Coffee: 100g
+#       Money: $0
+#  Report after purchasing latte:
+#       Water: 100ml
+#       Milk: 50ml
+#       Coffee: 76g
+#       Money: $2.5
+#  b. Once all resources have been deducted, tell the user “Here is your latte. Enjoy!” or their choice of drink.
+
+
+def make_coffee(coffee_choice, refund_money):
+    """
+
+    Function takes a dictionary (coffee_choice) and assigns a new variable "ingredients_to_deduct" dictionary values of
+    the "ingredients" key. Local scope variable "updated_resources" references the "resources" dictionary. A for loop
+    then loops through all keys associated with "ingredients" key - the updated_resources dict is then updated for each
+    key by subtracting the values of the updated_resources key from the "ingredients_to_deduct" - therefore updating the
+    outer-scope variable that is "resources". Then print the refund amount and coffee choice.
+
+    :param coffee_choice: dict containing values of the user chosen coffee
+    :param refund_money: float of the money refunded
+    """
+    ingredients_to_deduct = coffee_choice["ingredients"]
+    updated_resources = resources
+
+    for i in coffee_choice["ingredients"]:
+        updated_resources[i] = updated_resources[i] - ingredients_to_deduct[i]
+
+    print(f"Here is ${refund_money[1]} in change.")
+    print(f"Here is your {choice_str}. Enjoy!")
 
 
 coffee_machine_on = True
@@ -142,10 +175,8 @@ while coffee_machine_on:
             refund = process_coins(choice_dict)
             # if first element of the list is True - enough money was inserted
             if refund[0]:
-                print(f"Here is ${refund[1]} in change.")
-                print(f"Here is your {choice_str}. Enjoy!")
                 resources["money"] += choice_dict["cost"]
-                make_coffee(choice_dict)
+                make_coffee(choice_dict, refund)
             else:
                 print(f"Sorry, insufficient funds. Refunded ${refund[1]}.")
 
@@ -155,22 +186,4 @@ while coffee_machine_on:
     elif choice_str == 'report':
         print(format_report(resources))
     else:
-        print("not here")
-
-
-
-
-# TODO 7) Make Coffee.
-#  a. If the transaction is successful and there are enough resources to make the drink the
-#  user selected, then the ingredients to make the drink should be deducted from the coffee machine resources.
-#  E.g. report before purchasing latte:
-#       Water: 300ml
-#       Milk: 200ml
-#       Coffee: 100g
-#       Money: $0
-#  Report after purchasing latte:
-#       Water: 100ml
-#       Milk: 50ml
-#       Coffee: 76g
-#       Money: $2.5
-#  b. Once all resources have been deducted, tell the user “Here is your latte. Enjoy!” or their choice of drink.
+        print("Invalid options, try again!")
